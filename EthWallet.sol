@@ -1,15 +1,13 @@
 pragma solidity ^0.4.3;
 contract EthWallet {
-  address owner;
-  uint balance;
+  address public owner;
 
   function EthWallet() {
     owner = msg.sender;
-    balance = 0;
   }
 
   function () payable{
-    balance += uint(msg.value);
+
   }
 
   function SendWeiHome(uint256 amount){
@@ -29,6 +27,10 @@ contract EthWallet {
     return this.balance;
   }
 
+  function GetBalanceInEth() constant returns (uint){
+    return this.balance/1000000000000000000;
+  }
+
 }
 /*
 var TempContract = EthWallet;
@@ -37,6 +39,7 @@ MyContract.GetBalance();
 MyContract.owner();
 web3.eth.sendTransaction({from:web3.eth.accounts[0], to:EthWallet.address, value: web3.toWei(3, "ether")})
 MyContract.GetBalance();
+MyContract.GetBalanceInEth();
 MyContract.SendWei.sendTransaction(web3.eth.accounts[5], 1000000000000000000, {from:web3.eth.accounts[0],gas:1000000});
 MyContract.GetBalance();
 
