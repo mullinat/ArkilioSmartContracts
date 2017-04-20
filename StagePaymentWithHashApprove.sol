@@ -13,6 +13,7 @@ contract StagePaymentWithHashApprove {
     uint256 project_cost;
     bool[2] approved;//0 for creator, 1 for client
     string[] hash_list;//Position 0 is the origional contract
+    uint256 payment;
   }
 
   //Agreements mapping allows for users to create multiple agreements with a individual private key
@@ -82,7 +83,7 @@ contract StagePaymentWithHashApprove {
   }
 
   function ApproveAgreementClient(uint _key){
-    if(Agreements[_key].approved[0] == true && msg.sender == Agreements[_key].client){
+    if(Agreements[_key].approved[0] == true && msg.sender == Agreements[_key].client && Accounts[Agreements[_key].client] >= Agreements[_key].project_cost){
             Agreements[_key].approved[1] = true;
     }
   }
@@ -171,6 +172,7 @@ MyContract.GetPercentage(1,2);
 MyContract.GetApproved(1, 0);
 MyContract.GetApproved(1, 1);
 MyContract.ApproveAgreementCreator(1, {from:web3.eth.accounts[0],gas:1000000});
+MyContract.ClientPayment({from:web3.eth.accounts[1], to:EthWallet.address, value: web3.toWei(2, "ether")})
 MyContract.ApproveAgreementClient(1, {from:web3.eth.accounts[1],gas:1000000});
 MyContract.GetApproved(1, 0);
 MyContract.GetApproved(1, 1);
