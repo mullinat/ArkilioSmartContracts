@@ -21,8 +21,8 @@ contract StagePaymentWithHashApprove {
   //Accounts mapping allows for users to store and keep track of wei they input into this contract
   mapping(address => uint256) public Accounts;
 
-  //AgreementByUser mapping is used to look up which addresses created which agreements, also does not work, probably should take it out
-  mapping(address => uint[]) public AgreementByUser;
+  //AgreementByUser mapping is used to look up which addresses created which agreements, so far only keeps track of most recent contract
+  mapping(address => uint) public AgreementByUser;
 
   //Keep track of agreements made so far, in retrospect should have used array fro Agreements
   uint num_agreements = 0;
@@ -34,7 +34,7 @@ contract StagePaymentWithHashApprove {
   //Creates a new Agreement Object attached to msg.sender
   function CreateAgreement() {
     num_agreements += 1;
-    AgreementByUser[msg.sender].push(num_agreements);
+    AgreementByUser[msg.sender] = num_agreements;
     Agreements[num_agreements].creator = msg.sender;
   }
 
