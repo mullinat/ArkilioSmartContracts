@@ -11,7 +11,7 @@ contract StagePaymentWithHashApprove {
     uint stage;
     uint[] stage_percentages;
     uint256 project_cost;
-    bool approved;
+    bool[2] approved;//0 for creator, 1 for client
     string[] hash_list;//Position 0 is the origional contract
   }
 
@@ -39,19 +39,19 @@ contract StagePaymentWithHashApprove {
   }
 
   function AddClient(uint _key, address _client){
-    if(msg.sender == Agreements[_key].creator && Agreements[_key].approved == false){
+    if(msg.sender == Agreements[_key].creator && Agreements[_key].approved[0] == false){
       Agreements[_key].client = _client;
     }
   }
 
   function AddProjectCost(uint _key, uint256 _project_cost){
-    if(msg.sender == Agreements[_key].creator && Agreements[_key].approved == false){
+    if(msg.sender == Agreements[_key].creator && Agreements[_key].approved[0] == false){
       Agreements[_key].project_cost = _project_cost;
     }
   }
 
   function AddNumStages(uint _key, uint _num_stages){
-    if(msg.sender == Agreements[_key].creator && Agreements[_key].approved == false){
+    if(msg.sender == Agreements[_key].creator && Agreements[_key].approved[0] == false){
       Agreements[_key].num_stages = _num_stages;
     }
     for(uint i; i < _num_stages; i++){
@@ -61,7 +61,7 @@ contract StagePaymentWithHashApprove {
   }
 
   function AddStagePercentage(uint _key, uint _num_stage, uint _percentage){
-    if(msg.sender == Agreements[_key].creator && Agreements[_key].approved == false){
+    if(msg.sender == Agreements[_key].creator && Agreements[_key].approved[0] == false){
       if(Agreements[_key].num_stages >= _num_stage){
         Agreements[_key].stage_percentages[_num_stage] = _percentage;
       }
@@ -69,15 +69,21 @@ contract StagePaymentWithHashApprove {
   }
 
   //
-  function ApproveContract(uint _key){
+  function ApproveAgreementCreator(uint _key){
     bool _broken = false;
     if(msg.sender == Agreements[_key].creator){
       if(Agreements[_key].client == Agreements[0].client){
           _broken = true;
       }
+      if(_broken == false){
+        Agreements[_key].approved[0] = true;
+      }
     }
-    if(_broken == false){
-      Agreements[_key].approved = true;
+  }
+
+  function ApproveAgreementClient(uint _key){
+    if(Agreements[_key].approved[0] == true && msg.sender == Agreements[_key].client){
+            Agreements[_key].approved[1] = true;
     }
   }
 
@@ -100,8 +106,8 @@ contract StagePaymentWithHashApprove {
   function GetPercentage(uint _key, uint _position) constant returns (uint){
     return Agreements[_key].stage_percentages[_position];
   }
-  function GetApproved(uint _key) constant returns (bool){
-    return Agreements[_key].approved;
+  function GetApproved(uint _key, uint _pos) constant returns (bool){
+    return Agreements[_key].approved[_pos];
   }
   function GetHash(uint _key, uint _stage) constant returns (string){
     return Agreements[_key].hash_list[_stage];
@@ -128,7 +134,7 @@ contract StagePaymentWithHashApprove {
 
   //Hash approval with payment logic
   function SubmitHash(uint _key, string _hash){
-    if(msg.sender == Agreements[_key].creator){
+    if(msg.sender == Agreements[_key].creator && Agreements[_key].approved[1] == true){
       if(Agreements[_key].stage < Agreements[_key].num_stages){
         Agreements[_key].hash_list[Agreements[_key].stage] = _hash;
       }
@@ -136,7 +142,7 @@ contract StagePaymentWithHashApprove {
   }
 
   function ApproveHash(uint _key, bool _bool){
-    if(msg.sender == Agreements[_key].client){
+    if(msg.sender == Agreements[_key].client && Agreements[_key].approved[1] == true){
       if(Agreements[_key].stage < Agreements[_key].num_stages){
         Agreements[_key].stage += 1;
       }
@@ -162,22 +168,26 @@ MyContract.GetPercentage(1,0);
 MyContract.GetPercentage(1,1);
 MyContract.GetPercentage(1,2);
 
-MyContract.GetApproved(1);
-MyContract.ApproveContract(1, {from:web3.eth.accounts[0],gas:1000000});
-MyContract.GetApproved(1);
-
+MyContract.GetApproved(1, 0);
+MyContract.GetApproved(1, 1);
+MyContract.ApproveAgreementCreator(1, {from:web3.eth.accounts[0],gas:1000000});
+MyContract.ApproveAgreementClient(1, {from:web3.eth.accounts[1],gas:1000000});
+MyContract.GetApproved(1, 0);
+MyContract.GetApproved(1, 1);
 
 MyContract.SubmitHash(1, "Hello", {from:web3.eth.accounts[0],gas:1000000});
-MyContract.GetHash(1,0);
 MyContract.ApproveHash(1, true, {from:web3.eth.accounts[1],gas:1000000});
-MyContract.GetStage(1);
+
 MyContract.SubmitHash(1, "World", {from:web3.eth.accounts[0],gas:1000000});
-MyContract.GetHash(1,0);
 MyContract.ApproveHash(1, true, {from:web3.eth.accounts[1],gas:1000000});
+
 MyContract.SubmitHash(1, "I Like Pie", {from:web3.eth.accounts[0],gas:1000000});
-MyContract.GetHash(1,0);
 MyContract.ApproveHash(1, true, {from:web3.eth.accounts[1],gas:1000000});
+
 MyContract.GetStage(1);
+MyContract.GetHash(1,0);
+MyContract.GetHash(1,1);
+MyContract.GetHash(1,2);
 
 MyContract.ClientPayment({from:web3.eth.accounts[0], to:EthWallet.address, value: web3.toWei(1, "ether")})
 MyContract.ClientPayment({from:web3.eth.accounts[1], to:EthWallet.address, value: web3.toWei(2, "ether")})
