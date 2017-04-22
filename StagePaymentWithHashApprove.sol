@@ -1,3 +1,15 @@
+/*
+Issues
+  Upload hash of origional document
+  Record block number of each transaciton
+  Get your oney our of the contract
+  kill contract
+Optional features
+  Send invoices for portions individual stages
+  Contract extra work
+  negociate stages after contrat has been locked
+*/
+
 pragma solidity ^0.4.3;
 contract StagePaymentWithHashApprove {
   address creator; //use this for back doors later
