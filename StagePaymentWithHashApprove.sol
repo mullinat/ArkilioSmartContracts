@@ -67,7 +67,7 @@ contract StagePaymentWithHashApprove {
     if(msg.sender == Agreements[_key].creator && Agreements[_key].approved[0] == false){
       Agreements[_key].num_stages = _num_stages;
     }
-    for(uint i; i < _num_stages; i++){
+    for(uint i; i <= _num_stages; i++){
       Agreements[_key].stage_percentages.push(0);
       Agreements[_key].hash_list.push("0");
     }
@@ -79,6 +79,13 @@ contract StagePaymentWithHashApprove {
         Agreements[_key].stage_percentages[_num_stage] = _percentage;
       }
     }
+  }
+
+  function AddInitalHash(uint _key, string _hash){
+    if(msg.sender == Agreements[_key].creator && Agreements[_key].approved[0] == false){
+      Agreements[_key].hash_list[0] = _hash;
+    }
+    Agreements[_key].stage = 1;
   }
 
   //
@@ -148,7 +155,7 @@ contract StagePaymentWithHashApprove {
   //Hash approval with payment logic
   function SubmitHash(uint _key, string _hash){
     if(msg.sender == Agreements[_key].creator && Agreements[_key].approved[1] == true){
-      if(Agreements[_key].stage < Agreements[_key].num_stages){
+      if(Agreements[_key].stage <= Agreements[_key].num_stages){
         Agreements[_key].hash_list[Agreements[_key].stage] = _hash;
       }
     }
@@ -172,6 +179,7 @@ MyContract.AddNumStages(1, 3, {from:web3.eth.accounts[0],gas:1000000});
 MyContract.AddStagePercentage(1, 0, 5, {from:web3.eth.accounts[0],gas:1000000});
 MyContract.AddStagePercentage(1, 1, 10, {from:web3.eth.accounts[0],gas:1000000});
 MyContract.AddStagePercentage(1, 2, 15, {from:web3.eth.accounts[0],gas:1000000});
+MyContract.AddInitalHash(1, "I LIKE PIE", {from:web3.eth.accounts[0],gas:1000000});
 
 MyContract.GetCreator(1);
 MyContract.GetClient(1);
@@ -180,6 +188,8 @@ MyContract.GetNumStages(1);
 MyContract.GetPercentage(1,0);
 MyContract.GetPercentage(1,1);
 MyContract.GetPercentage(1,2);
+MyContract.GetPercentage(1,2);
+MyContract.GetHash(1,0);
 
 MyContract.GetApproved(1, 0);
 MyContract.GetApproved(1, 1);
@@ -202,6 +212,7 @@ MyContract.GetStage(1);
 MyContract.GetHash(1,0);
 MyContract.GetHash(1,1);
 MyContract.GetHash(1,2);
+MyContract.GetHash(1,3);
 
 MyContract.ClientPayment({from:web3.eth.accounts[0], to:EthWallet.address, value: web3.toWei(1, "ether")})
 MyContract.ClientPayment({from:web3.eth.accounts[1], to:EthWallet.address, value: web3.toWei(2, "ether")})
