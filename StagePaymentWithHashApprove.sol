@@ -168,6 +168,14 @@ contract StagePaymentWithHashApprove {
       }
     }
   }
+
+  function kill()
+  {
+      if (msg.sender == creator)
+      {
+          suicide(creator);
+      }
+  }
 }
 /*
 var TempContract = StagePaymentWithHashApprove;
@@ -221,4 +229,6 @@ MyContract.GetBalance();
 MyContract.Accounts(web3.eth.accounts[0]);
 MyContract.Accounts(web3.eth.accounts[1]);
 MyContract.Accounts(web3.eth.accounts[2]);
+
+MyContract.kill({from:web3.eth.accounts[0],gas:1000000});
 */
