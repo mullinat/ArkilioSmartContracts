@@ -22,7 +22,7 @@ contract StagePaymentWithHashApprove {
     uint num_stages;
     uint stage;
     uint[] stage_percentages;
-    uint256 project_cost;
+    uint project_cost;
     bool[2] approved;//0 for creator, 1 for client
     string[] hash_list;//Position 0 is the origional contract
     uint256 payment;
@@ -182,7 +182,7 @@ var TempContract = StagePaymentWithHashApprove;
 var MyContract = web3.eth.contract(TempContract.abi).at(TempContract.address);
 MyContract.CreateAgreement({from:web3.eth.accounts[0],gas:1000000});
 MyContract.AddClient(1, web3.eth.accounts[1], {from:web3.eth.accounts[0],gas:1000000});
-MyContract.AddProjectCost(1, 1000000000000000000, {from:web3.eth.accounts[0],gas:1000000}));
+MyContract.AddProjectCost(1, 100, {from:web3.eth.accounts[0],gas:1000000});
 MyContract.AddNumStages(1, 3, {from:web3.eth.accounts[0],gas:1000000});
 MyContract.AddStagePercentage(1, 0, 5, {from:web3.eth.accounts[0],gas:1000000});
 MyContract.AddStagePercentage(1, 1, 10, {from:web3.eth.accounts[0],gas:1000000});
