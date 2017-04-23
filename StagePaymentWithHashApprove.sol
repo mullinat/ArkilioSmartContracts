@@ -25,7 +25,7 @@ contract StagePaymentWithHashApprove {
     uint project_cost;
     bool[2] approved;//0 for creator, 1 for client
     string[] hash_list;//Position 0 is the origional contract
-    uint256 payment;
+    uint payment;
   }
 
   //Agreements mapping allows for users to create multiple agreements with a individual private key
@@ -136,17 +136,9 @@ contract StagePaymentWithHashApprove {
 
 
   //This function can take payments from any user and store how much they sent this contract
-  function ClientPayment() payable{
+  function () payable{
     Accounts[msg.sender] += msg.value;
   }
-
-  /*function SendWei(address user, uint256 amount)constant returns (bool){
-    if(msg.sender == owner){
-      if (!user.send(amount)) throw;
-      return true;
-    }
-    return false;
-  }*/
 
   function GetBalance() constant returns (uint){
     return this.balance;
@@ -165,6 +157,12 @@ contract StagePaymentWithHashApprove {
     if(msg.sender == Agreements[_key].client && Agreements[_key].approved[1] == true){
       if(Agreements[_key].stage < Agreements[_key].num_stages){
         Agreements[_key].stage += 1;
+        address user = Agreements[_key].creator;
+        uint amount = Agreements[_key].project_cost;
+        //uint stage = Agreements[_key].stage;
+        //uint portion = Agreements[_key].stage_percentages[stage];
+        if (!user.send(amount)) throw;
+
       }
     }
   }
@@ -182,7 +180,7 @@ var TempContract = StagePaymentWithHashApprove;
 var MyContract = web3.eth.contract(TempContract.abi).at(TempContract.address);
 MyContract.CreateAgreement({from:web3.eth.accounts[0],gas:1000000});
 MyContract.AddClient(1, web3.eth.accounts[1], {from:web3.eth.accounts[0],gas:1000000});
-MyContract.AddProjectCost(1, 100, {from:web3.eth.accounts[0],gas:1000000});
+MyContract.AddProjectCost(1, web3.toWei(1, "ether"), {from:web3.eth.accounts[0],gas:1000000});
 MyContract.AddNumStages(1, 3, {from:web3.eth.accounts[0],gas:1000000});
 MyContract.AddStagePercentage(1, 0, 5, {from:web3.eth.accounts[0],gas:1000000});
 MyContract.AddStagePercentage(1, 1, 10, {from:web3.eth.accounts[0],gas:1000000});
@@ -197,12 +195,11 @@ MyContract.GetPercentage(1,0);
 MyContract.GetPercentage(1,1);
 MyContract.GetPercentage(1,2);
 MyContract.GetPercentage(1,2);
-MyContract.GetHash(1,0);
 
 MyContract.GetApproved(1, 0);
 MyContract.GetApproved(1, 1);
 MyContract.ApproveAgreementCreator(1, {from:web3.eth.accounts[0],gas:1000000});
-MyContract.ClientPayment({from:web3.eth.accounts[1], to:EthWallet.address, value: web3.toWei(2, "ether")})
+web3.eth.sendTransaction({from:web3.eth.accounts[1], to:StagePaymentWithHashApprove.address, value: web3.toWei(2, "ether")});
 MyContract.ApproveAgreementClient(1, {from:web3.eth.accounts[1],gas:1000000});
 MyContract.GetApproved(1, 0);
 MyContract.GetApproved(1, 1);
@@ -222,9 +219,9 @@ MyContract.GetHash(1,1);
 MyContract.GetHash(1,2);
 MyContract.GetHash(1,3);
 
-MyContract.ClientPayment({from:web3.eth.accounts[0], to:EthWallet.address, value: web3.toWei(1, "ether")})
-MyContract.ClientPayment({from:web3.eth.accounts[1], to:EthWallet.address, value: web3.toWei(2, "ether")})
-MyContract.ClientPayment({from:web3.eth.accounts[2], to:EthWallet.address, value: web3.toWei(3, "ether")})
+MyContract.({from:web3.eth.accounts[0], to:StagePaymentWithHashApprove.address, value: web3.toWei(1, "ether")})
+MyContract.({from:web3.eth.accounts[1], to:StagePaymentWithHashApprove.address, value: web3.toWei(2, "ether")})
+MyContract.({from:web3.eth.accounts[2], to:StagePaymentWithHashApprove.address, value: web3.toWei(3, "ether")})
 MyContract.GetBalance();
 MyContract.Accounts(web3.eth.accounts[0]);
 MyContract.Accounts(web3.eth.accounts[1]);
